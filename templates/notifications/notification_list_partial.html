@@ -1,0 +1,32 @@
+{% if notifications %}
+    <div id="notification-list" class="list-group">
+        {% for notification in notifications %}
+            <div class="list-group-item {% if not notification.is_read %}list-group-item-primary{% endif %}" id="notification-{{ notification.pk }}">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">{{ notification.title }}</h6>
+                    <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                </div>
+                <p class="mb-1">{{ notification.message }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">{{ notification.get_notification_type_display }}</small>
+                    {% if not notification.is_read %}
+                        <button type="button"
+                           hx-post="{% url 'mark_as_read' notification.pk %}"
+                           hx-target="#notification-{{ notification.pk }}"
+                           hx-swap="outerHTML"
+                           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                           hx-on::after-swap="if(event.detail.xhr.getResponseHeader('X-Badge-Update')) { document.getElementById('notification-badge').outerHTML = event.detail.xhr.getResponseHeader('X-Badge-Update'); }"
+                           class="btn btn-sm btn-outline-primary">Mark as Read</button>
+                    {% endif %}
+                </div>
+                {% if notification.request %}
+                    <a href="{% url 'request_detail' notification.request.pk %}" class="btn btn-sm btn-link mt-2">View Request</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        You have no notifications.
+    </div>
+{% endif %}

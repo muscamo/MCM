@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Profile - Media Center Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="fw-bold">My Profile</h1>
+            <button class="btn btn-outline-primary" id="editProfileBtn">
+                <i class="bi bi-pencil me-1"></i>Edit Profile
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4 mb-md-0">
+                        <div class="profile-picture-container">
+                            {% if request.user.profile_picture %}
+                                <img src="{{ request.user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle img-fluid" style="max-width: 150px; max-height: 150px; object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; margin: 0 auto;">
+                                    <i class="bi bi-person text-white" style="font-size: 4rem;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <h5 class="mt-3">{{ request.user.get_full_name|default:request.user.username }}</h5>
+                        <p class="text-muted mb-0">{{ request.user.email }}</p>
+                        <span class="badge bg-primary mt-2">{{ request.user.get_role_display }}</span>
+                        {% if request.user.departments.all %}
+                            <div class="mt-2">
+                                {% for dept in request.user.departments.all %}
+                                    <span class="badge bg-info">{{ dept.name }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <div id="profileDisplay">
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong class="text-muted">Username:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ request.user.username }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong class="text-muted">First Name:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ request.user.first_name|default:'-' }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong class="text-muted">Last Name:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ request.user.last_name|default:'-' }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong class="text-muted">Phone:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ request.user.phone|default:'-' }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong class="text-muted">Role:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ request.user.get_role_display }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong class="text-muted">Departments:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {% if request.user.departments.all %}
+                                        {% for dept in request.user.departments.all %}
+                                            {{ dept.name }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="profileEdit" style="display: none;">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {{ form|crispy }}
+                                <div class="d-flex gap-2 mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle me-1"></i>Save Changes
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" id="cancelEditBtn">
+                                        <i class="bi bi-x-circle me-1"></i>Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('editProfileBtn').addEventListener('click', function() {
+    document.getElementById('profileDisplay').style.display = 'none';
+    document.getElementById('profileEdit').style.display = 'block';
+    this.style.display = 'none';
+});
+
+document.getElementById('cancelEditBtn').addEventListener('click', function() {
+    document.getElementById('profileDisplay').style.display = 'block';
+    document.getElementById('profileEdit').style.display = 'none';
+    document.getElementById('editProfileBtn').style.display = 'inline-block';
+});
+</script>
+{% endblock %}

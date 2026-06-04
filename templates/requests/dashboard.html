@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Media Center Manager{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="fw-bold">Welcome, {{ user.get_full_name|default:user.username }}!</h1>
+                <p class="text-muted mb-0">
+                    <i class="bi bi-person-badge me-1"></i>{{ user.get_role_display }}
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'profile' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-person me-1"></i>Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        {% if user.is_communication_director %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Pending Requests ({{ total_pending }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_requests %}
+                        <div class="list-group">
+                            {% for req in pending_requests %}
+                                <a href="{% url 'request_detail' req.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1 fw-semibold">{{ req.title }}</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="bi bi-tag me-1"></i>{{ req.service_type.name }} 
+                                                <span class="mx-2">•</span>
+                                                <i class="bi bi-building me-1"></i>{{ req.department.name }}
+                                            </p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-warning text-dark">{{ req.get_status_display }}</span>
+                                            <small class="text-muted d-block mt-1">{{ req.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'request_list' %}?status=pending" class="btn btn-primary mt-3">
+                            <i class="bi bi-list-ul me-1"></i>View All Pending
+                        </a>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">No pending requests.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clipboard-check me-2"></i>Assigned Requests ({{ total_assigned }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if assigned_requests %}
+                        <div class="list-group">
+                            {% for req in assigned_requests %}
+                                <a href="{% url 'request_detail' req.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1 fw-semibold">{{ req.title }}</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="bi bi-tag me-1"></i>{{ req.service_type.name }} 
+                                                <span class="mx-2">•</span>
+                                                <i class="bi bi-building me-1"></i>{{ req.department.name }}
+                                            </p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-info">{{ req.get_status_display }}</span>
+                                            <small class="text-muted d-block mt-1">{{ req.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'request_list' %}" class="btn btn-success mt-3">
+                            <i class="bi bi-list-ul me-1"></i>View All Requests
+                        </a>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">No assigned requests.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        {% elif user.is_media_team %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-person-workspace me-2"></i>My Assignments ({{ total_assigned }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if my_requests %}
+                        <div class="list-group">
+                            {% for req in my_requests %}
+                                <a href="{% url 'request_detail' req.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1 fw-semibold">{{ req.title }}</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="bi bi-tag me-1"></i>{{ req.service_type.name }} 
+                                                <span class="mx-2">•</span>
+                                                <i class="bi bi-building me-1"></i>{{ req.department.name }}
+                                            </p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-info">{{ req.get_status_display }}</span>
+                                            <div class="progress mt-2" style="width: 100px; height: 6px;">
+                                                <div class="progress-bar" role="progressbar" style="width: {{ req.progress_percentage }}%"></div>
+                                            </div>
+                                            <small class="text-muted d-block mt-1">{{ req.progress_percentage }}%</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'request_list' %}" class="btn btn-primary mt-3">
+                            <i class="bi bi-list-ul me-1"></i>View All Assignments
+                        </a>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">You have no assigned requests.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        {% else %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-file-earmark-text me-2"></i>My Requests ({{ total_requests }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if my_requests %}
+                        <div class="list-group">
+                            {% for req in my_requests %}
+                                <a href="{% url 'request_detail' req.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1 fw-semibold">{{ req.title }}</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="bi bi-tag me-1"></i>{{ req.service_type.name }}
+                                            </p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-primary">{{ req.get_status_display }}</span>
+                                            <small class="text-muted d-block mt-1">{{ req.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'request_list' %}" class="btn btn-primary mt-3">
+                            <i class="bi bi-list-ul me-1"></i>View All Requests
+                        </a>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-file-earmark-plus text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">You haven't submitted any requests yet.</p>
+                            <a href="{% url 'request_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Submit a Request
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if user.is_department_staff %}
+                        <a href="{% url 'request_create' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>New Service Request
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'request_list' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-list-ul me-1"></i>View All Requests
+                    </a>
+                    <a href="{% url 'notification_list' %}" class="btn btn-outline-secondary position-relative">
+                        <i class="bi bi-bell me-1"></i>Notifications
+                        {% if unread_notifications %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ unread_notifications|length }}
+                            </span>
+                        {% endif %}
+                    </a>
+                    {% if user.is_superuser or user.is_admin %}
+                        <hr>
+                        <h6 class="text-muted small mb-2">Administration</h6>
+                        <a href="{% url 'user_list' %}" class="btn btn-outline-warning">
+                            <i class="bi bi-people me-1"></i>Manage Users
+                        </a>
+                        <a href="{% url 'user_create' %}" class="btn btn-outline-warning">
+                            <i class="bi bi-person-plus me-1"></i>Create User
+                        </a>
+                        <a href="{% url 'department_create' %}" class="btn btn-outline-success">
+                            <i class="bi bi-building me-1"></i>Create Department
+                        </a>
+                        <a href="{% url 'service_type_create' %}" class="btn btn-outline-info">
+                            <i class="bi bi-tag me-1"></i>Create Service Type
+                        </a>
+                    {% elif user.is_communication_director %}
+                        <hr>
+                        <h6 class="text-muted small mb-2">Administration</h6>
+                        <a href="{% url 'department_create' %}" class="btn btn-outline-success">
+                            <i class="bi bi-building me-1"></i>Create Department
+                        </a>
+                        <a href="{% url 'service_type_create' %}" class="btn btn-outline-info">
+                            <i class="bi bi-tag me-1"></i>Create Service Type
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if unread_notifications %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-bell me-2"></i>Recent Notifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for notif in unread_notifications %}
+                            <a href="{% url 'mark_as_read' notif.pk %}" 
+                               hx-post="{% url 'mark_as_read' notif.pk %}"
+                               hx-target="#notification-list"
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1 fw-semibold small">{{ notif.title }}</h6>
+                                        <p class="mb-1 small text-muted">{{ notif.message }}</p>
+                                    </div>
+                                    <small class="text-muted">{{ notif.created_at|timesince }} ago</small>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'notification_list' %}" class="btn btn-sm btn-outline-primary mt-2 w-100">
+                        <i class="bi bi-eye me-1"></i>View All
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

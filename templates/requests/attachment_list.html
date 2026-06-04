@@ -1,0 +1,17 @@
+{% if attachments %}
+    <div class="list-group">
+        {% for attachment in attachments %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename }}</a>
+                {% if attachment.description %}
+                <small class="text-muted">- {{ attachment.description }}</small>
+                {% endif %}
+            </div>
+            <small class="text-muted">Uploaded by {{ attachment.uploaded_by.get_full_name }}</small>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-muted">No attachments yet.</p>
+{% endif %}

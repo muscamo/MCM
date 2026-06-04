@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Users - Media Center Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Manage Users</h1>
+            <a href="{% url 'user_create' %}" class="btn btn-primary">Create New User</a>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" name="search" class="form-control" placeholder="Search users..." value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="role" class="form-select">
+                            <option value="">All Roles</option>
+                            <option value="department_staff" {% if role_filter == 'department_staff' %}selected{% endif %}>Department Staff</option>
+                            <option value="communication_director" {% if role_filter == 'communication_director' %}selected{% endif %}>Communication Director</option>
+                            <option value="media_team" {% if role_filter == 'media_team' %}selected{% endif %}>Media Team</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{% url 'user_list' %}" class="btn btn-secondary">Clear</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if users %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Department</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.get_full_name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.get_role_display }}</td>
+                                    <td>{{ user.department.name|default:'-' }}</td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'user_edit' user.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                                        {% if user != request.user %}
+                                            <a href="{% url 'user_toggle_active' user.pk %}" class="btn btn-sm {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                                                {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No users found.
+                <a href="{% url 'user_create' %}">Create your first user.</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Service Requests - Media Center Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Service Requests</h1>
+            {% if user.is_department_staff %}
+                <a href="{% url 'request_create' %}" class="btn btn-primary">New Request</a>
+            {% endif %}
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">All Statuses</option>
+                            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                            <option value="assigned" {% if status_filter == 'assigned' %}selected{% endif %}>Assigned</option>
+                            <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{% url 'request_list' %}" class="btn btn-secondary">Clear</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if requests %}
+            <div class="row">
+                {% for req in requests %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">{{ req.service_type.name }}</h6>
+                                    <span class="badge bg-{% if req.status == 'pending' %}warning{% elif req.status == 'approved' %}info{% elif req.status == 'assigned' %}primary{% elif req.status == 'in_progress' %}success{% elif req.status == 'completed' %}dark{% else %}danger{% endif %}">
+                                        {{ req.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ req.title }}</h5>
+                                <p class="card-text text-muted small">
+                                    <strong>Department:</strong> {{ req.department.name }}<br>
+                                    <strong>Requester:</strong> {{ req.requester.get_full_name }}<br>
+                                    <strong>Event Date:</strong> {{ req.event_date|date:"M d, Y" }}<br>
+                                    <strong>Priority:</strong> {{ req.get_priority_display }}
+                                </p>
+                                <p class="card-text">{{ req.description|truncatewords:15 }}</p>
+                                {% if req.progress_percentage > 0 %}
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ req.progress_percentage }}%" aria-valuenow="{{ req.progress_percentage }}" aria-valuemin="0" aria-valuemax="100">{{ req.progress_percentage }}%</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <a href="{% url 'request_detail' req.pk %}" class="btn btn-primary btn-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No service requests found.
+                {% if user.is_department_staff %}
+                    <a href="{% url 'request_create' %}">Submit your first request.</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

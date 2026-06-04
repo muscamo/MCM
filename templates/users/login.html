@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Login - Media Center Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card mt-5">
+            <div class="card-header text-center">
+                <img src="{% static 'img/nzcmedia.png' %}" alt="NZC Media" height="60" class="mb-3">
+                <h4 class="mb-0">Login</h4>
+            </div>
+            <div class="card-body">
+                {# Google login button - commented out until django-allauth is installed #}
+                {# <a href="{% provider_login_url 'google' %}" class="btn btn-outline-dark w-100 mb-3"> #}
+                {#     <i class="bi bi-google me-2"></i>Sign in with Google #}
+                {# </a> #}
+                
+                {# <div class="text-center mb-3"> #}
+                {#     <span class="text-muted">or</span> #}
+                {# </div> #}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                <p class="text-center mt-3">
+                    Don't have an account? <a href="{% url 'register' %}">Register here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

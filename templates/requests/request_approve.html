@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Approve Request - Media Center Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>Approve/Reject Request</h1>
+        <div class="card mt-4">
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5>{{ request.title }}</h5>
+                    <p>{{ request.description }}</p>
+                    <p><strong>Service Type:</strong> {{ request.service_type.name }}</p>
+                    <p><strong>Department:</strong> {{ request.department.name }}</p>
+                    <p><strong>Event Date:</strong> {{ request.event_date|date:"M d, Y" }}</p>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Action</label>
+                        <div>
+                            {% for choice in form.action.field.choices %}
+                            <div class="form-check">
+                                <input type="radio" name="action" value="{{ choice.0 }}" id="action_{{ choice.0 }}" class="form-check-input" hx-post="{% url 'request_approve' request.pk %}" hx-target="#assignment-section" hx-include="[name='csrfmiddlewaretoken']" hx-params='action' hx-trigger="change">
+                                <label class="form-check-label" for="action_{{ choice.0 }}">{{ choice.1 }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div id="assignment-section" class="mb-3" style="display: none;">
+                        <label class="form-label">Assign to Media Team Members</label>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="assign_to_all" id="assign_to_all" class="form-check-input" hx-post="{% url 'request_approve' request.pk %}" hx-target="#assign-to-list" hx-include="[name='csrfmiddlewaretoken']" hx-params='assign_to_all' hx-trigger="change">
+                            <label class="form-check-label" for="assign_to_all">Assign to all media team members</label>
+                        </div>
+                        <div id="assign-to-list">
+                            {% for member in form.assign_to.field.queryset %}
+                            <div class="form-check">
+                                <input type="checkbox" name="assign_to" value="{{ member.pk }}" id="assign_to_{{ member.pk }}" class="form-check-input">
+                                <label class="form-check-label" for="assign_to_{{ member.pk }}">{{ member.get_full_name }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rejection Reason</label>
+                        {{ form.rejection_reason }}
+                        <small class="form-text text-muted">Required if rejecting the request</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Submit Decision</button>
+                        <a href="{% url 'request_detail' request.pk %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const actionRadios = document.querySelectorAll('input[name="action"]');
+    const assignmentSection = document.getElementById('assignment-section');
+    const assignToAll = document.getElementById('assign_to_all');
+    const assignToList = document.getElementById('assign-to-list');
+    
+    actionRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'approve') {
+                assignmentSection.style.display = 'block';
+            } else {
+                assignmentSection.style.display = 'none';
+            }
+        });
+    });
+    
+    assignToAll.addEventListener('change', function() {
+        if (this.checked) {
+            assignToList.style.display = 'none';
+        } else {
+            assignToList.style.display = 'block';
+        }
+    });
+});
+</script>
+{% endblock %}

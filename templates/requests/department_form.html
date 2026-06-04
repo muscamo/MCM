@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Media Center Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>{{ title }}</h1>
+        <div class="card mt-4">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="{% url 'department_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% if department %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Department Members</h5>
+            </div>
+            <div class="card-body">
+                {% if members %}
+                    <ul class="list-group mb-3">
+                        {% for member in members %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ member.get_full_name }}</strong>
+                                <small class="text-muted d-block">{{ member.email }}</small>
+                                <span class="badge bg-secondary">{{ member.get_role_display }}</span>
+                            </div>
+                            <form method="post" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ member.pk }}">
+                                <button type="submit" name="remove_member" class="btn btn-sm btn-danger">Remove</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No members in this department yet.</p>
+                {% endif %}
+                
+                <hr>
+                
+                <h6>Add Member</h6>
+                <form method="post" class="d-flex gap-2">
+                    {% csrf_token %}
+                    <select name="user_id" class="form-select">
+                        <option value="">Select a user to add...</option>
+                        {% for user in non_members %}
+                        <option value="{{ user.pk }}">{{ user.get_full_name }} ({{ user.get_role_display }})</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" name="add_member" class="btn btn-success">Add</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

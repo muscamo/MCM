@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ request.title }} - Media Center Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>{{ request.title }}</h1>
+            <div>
+                <span class="badge bg-{% if request.status == 'pending' %}warning{% elif request.status == 'approved' %}info{% elif request.status == 'assigned' %}primary{% elif request.status == 'in_progress' %}success{% elif request.status == 'completed' %}dark{% else %}danger{% endif %} fs-6">
+                    {{ request.get_status_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Request Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Service Type:</strong> {{ request.service_type.name }}</p>
+                        <p><strong>Department:</strong> {{ request.department.name }}</p>
+                        <p><strong>Requester:</strong> {{ request.requester.get_full_name }}</p>
+                        <p><strong>Priority:</strong> {{ request.get_priority_display }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Event Date:</strong> {{ request.event_date|date:"M d, Y" }}</p>
+                        {% if request.event_time %}
+                        <p><strong>Event Time:</strong> {{ request.event_time|time:"g:i A" }}</p>
+                        {% endif %}
+                        {% if request.deadline %}
+                        <p><strong>Deadline:</strong> {{ request.deadline|date:"M d, Y" }}</p>
+                        {% endif %}
+                        {% if request.location %}
+                        <p><strong>Location:</strong> {{ request.location }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <hr>
+                <p><strong>Description:</strong></p>
+                <p>{{ request.description }}</p>
+                {% if request.special_requirements %}
+                <p><strong>Special Requirements:</strong></p>
+                <p>{{ request.special_requirements }}</p>
+                {% endif %}
+                {% if request.expected_attendees %}
+                <p><strong>Expected Attendees:</strong> {{ request.expected_attendees }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if request.progress_percentage > 0 %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Progress</h5>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-2" style="height: 30px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ request.progress_percentage }}%" aria-valuenow="{{ request.progress_percentage }}" aria-valuemin="0" aria-valuemax="100">{{ request.progress_percentage }}%</div>
+                </div>
+                {% if request.progress_notes %}
+                <p><strong>Progress Notes:</strong></p>
+                <p>{{ request.progress_notes }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Comments</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'add_comment' request.pk %}" hx-post="{% url 'add_comment' request.pk %}" hx-target="#comment-list">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ comment_form.comment }}
+                    </div>
+                    <div class="mb-3 form-check">
+                        {{ comment_form.is_internal }}
+                        <label class="form-check-label" for="{{ comment_form.is_internal.id_for_label }}">Internal (only visible to media team)</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Add Comment</button>
+                </form>
+                <hr>
+                <div id="comment-list">
+                    {% if comments %}
+                        <div class="list-group mb-3">
+                            <h6>Public Comments</h6>
+                            {% for comment in comments %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <strong>{{ comment.author.get_full_name }}</strong>
+                                    <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                </div>
+                                <p class="mb-1 mt-2">{{ comment.comment }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if user.is_media_team or user.is_communication_director %}
+                        {% if internal_comments %}
+                            <div class="list-group">
+                                <h6>Internal Comments</h6>
+                                {% for comment in internal_comments %}
+                                <div class="list-group-item bg-light">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <strong>{{ comment.author.get_full_name }}</strong>
+                                        <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                    </div>
+                                    <p class="mb-1 mt-2">{{ comment.comment }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Attachments</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'add_attachment' request.pk %}" hx-post="{% url 'add_attachment' request.pk %}" hx-target="#attachment-list" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ attachment_form.file }}
+                    </div>
+                    <div class="mb-3">
+                        {{ attachment_form.description }}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Upload Attachment</button>
+                </form>
+                <hr>
+                <div id="attachment-list">
+                    {% if attachments %}
+                        <div class="list-group">
+                            {% for attachment in attachments %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename }}</a>
+                                    {% if attachment.description %}
+                                    <small class="text-muted">- {{ attachment.description }}</small>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Uploaded by {{ attachment.uploaded_by.get_full_name }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No attachments yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if user.is_communication_director or user.is_admin %}
+                        {% if request.status == 'pending' %}
+                            <a href="{% url 'request_approve' request.pk %}" class="btn btn-warning">Approve/Reject Request</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if user.is_communication_director or user.is_admin %}
+                        {% if request.status == 'approved' %}
+                            <a href="{% url 'request_assign' request.pk %}" class="btn btn-info">Assign Team Member</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if user.is_media_team or user.is_communication_director or user.is_admin %}
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#progressModal">Update Progress</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if assignments %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Assigned Team Members</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for assignment in assignments %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <strong>{{ assignment.assigned_to.get_full_name }}</strong>
+                            {% if assignment.is_primary %}
+                            <span class="badge bg-primary">Primary</span>
+                            {% endif %}
+                        </div>
+                        {% if assignment.notes %}
+                        <p class="mb-1 small text-muted">{{ assignment.notes }}</p>
+                        {% endif %}
+                        <small class="text-muted">Assigned {{ assignment.assigned_at|timesince }} ago</small>
+                        {% if user.is_communication_director or user.is_admin %}
+                        <div class="mt-2">
+                            <a href="{% url 'reassign_assignment' assignment.pk %}" class="btn btn-sm btn-outline-warning">Reassign</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Timeline</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Submitted:</strong> {{ request.created_at|date:"M d, Y g:i A" }}
+                    </li>
+                    {% if request.approved_at %}
+                    <li class="list-group-item">
+                        <strong>Approved:</strong> {{ request.approved_at|date:"M d, Y g:i A" }} by {{ request.approved_by.get_full_name }}
+                    </li>
+                    {% endif %}
+                    <li class="list-group-item">
+                        <strong>Last Updated:</strong> {{ request.updated_at|date:"M d, Y g:i A" }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Modal -->
+{% if user.is_media_team or user.is_communication_director or user.is_admin %}
+<div class="modal fade" id="progressModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Progress</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'progress_update' request.pk %}" hx-post="{% url 'progress_update' request.pk %}" hx-target="#progressModal" hx-on::after-request="bootstrap.Modal.getInstance(document.getElementById('progressModal')).hide()">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="progress_percentage" class="form-label">Progress: <span id="progressValue">{{ request.progress_percentage }}</span>%</label>
+                        <input type="range" class="form-range" id="progress_percentage" name="progress_percentage" min="0" max="100" value="{{ request.progress_percentage }}" oninput="document.getElementById('progressValue').textContent = this.value">
+                    </div>
+                    <div class="mb-3">
+                        <label for="progress_notes" class="form-label">Progress Notes</label>
+                        <textarea class="form-control" id="progress_notes" name="progress_notes" rows="3" placeholder="Add progress notes...">{{ request.progress_notes }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Progress</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

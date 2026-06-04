@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update Progress - Media Center Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>Update Progress</h1>
+        <div class="card mt-4">
+            <div class="card-body">
+                <form method="post" hx-post="{% url 'progress_update' request.pk %}" hx-target="closest .modal">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary">Update Progress</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
