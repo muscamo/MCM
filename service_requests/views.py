@@ -65,7 +65,7 @@ def dashboard(request):
     unread_notifications = Notification.objects.filter(recipient=user, is_read=False)[:5]
     context['unread_notifications'] = unread_notifications
     
-    return render(request, 'requests/dashboard.html', context)
+    return render(request, 'service_requests/dashboard.html', context)
 
 
 @login_required
@@ -86,7 +86,7 @@ def request_list(request):
         requests = requests.filter(status=status_filter)
     
     context = {'requests': requests, 'status_filter': status_filter}
-    return render(request, 'requests/request_list.html', context)
+    return render(request, 'service_requests/request_list.html', context)
 
 
 @login_required
@@ -126,7 +126,7 @@ def request_create(request):
     else:
         form = ServiceRequestForm(user=request.user)
     
-    return render(request, 'requests/request_form.html', {'form': form})
+    return render(request, 'service_requests/request_form.html', {'form': form})
 
 
 @login_required
@@ -149,7 +149,7 @@ def request_detail(request, pk):
         'comment_form': comment_form,
         'attachment_form': attachment_form,
     }
-    return render(request, 'requests/request_detail.html', context)
+    return render(request, 'service_requests/request_detail.html', context)
 
 
 @login_required
@@ -295,7 +295,7 @@ def request_approve(request, pk):
     
     form = ServiceRequestApprovalForm()
     form.fields['assign_to'].queryset = User.objects.filter(role='media_team')
-    return render(request, 'requests/request_approve.html', {'form': form, 'request': service_request})
+    return render(request, 'service_requests/request_approve.html', {'form': form, 'request': service_request})
 
 
 @login_required
@@ -373,7 +373,7 @@ def request_assign(request, pk):
         'request': service_request,
         'media_team': media_team,
     }
-    return render(request, 'requests/request_assign.html', context)
+    return render(request, 'service_requests/request_assign.html', context)
 
 
 @login_required
@@ -443,7 +443,7 @@ def progress_update(request, pk):
     else:
         form = ProgressUpdateForm(initial={'progress_percentage': service_request.progress_percentage})
     
-    return render(request, 'requests/progress_update.html', {'form': form, 'request': service_request})
+    return render(request, 'service_requests/progress_update.html', {'form': form, 'request': service_request})
 
 
 @login_required
@@ -489,7 +489,7 @@ def add_comment(request, pk):
             messages.success(request, 'Comment added successfully!')
             
             if request.headers.get('HX-Request'):
-                return render(request, 'requests/comment_list.html', {
+                return render(request, 'service_requests/comment_list.html', {
                     'request': service_request,
                     'comments': service_request.comments.filter(is_internal=comment.is_internal),
                 })
@@ -514,7 +514,7 @@ def add_attachment(request, pk):
             messages.success(request, 'Attachment added successfully!')
             
             if request.headers.get('HX-Request'):
-                return render(request, 'requests/attachment_list.html', {
+                return render(request, 'service_requests/attachment_list.html', {
                     'request': service_request,
                     'attachments': service_request.attachments.all(),
                 })
@@ -527,7 +527,7 @@ def add_attachment(request, pk):
 @user_passes_test(is_admin)
 def department_list(request):
     departments = Department.objects.all()
-    return render(request, 'requests/department_list.html', {'departments': departments})
+    return render(request, 'service_requests/department_list.html', {'departments': departments})
 
 
 @login_required
@@ -542,7 +542,7 @@ def department_create(request):
     else:
         form = DepartmentForm()
     
-    return render(request, 'requests/department_form.html', {'form': form, 'title': 'Create Department'})
+    return render(request, 'service_requests/department_form.html', {'form': form, 'title': 'Create Department'})
 
 
 @login_required
@@ -587,14 +587,14 @@ def department_edit(request, pk):
         'members': department.members.all(),
         'non_members': non_members,
     }
-    return render(request, 'requests/department_form.html', context)
+    return render(request, 'service_requests/department_form.html', context)
 
 
 @login_required
 @user_passes_test(is_admin)
 def service_type_list(request):
     service_types = ServiceType.objects.all()
-    return render(request, 'requests/service_type_list.html', {'service_types': service_types})
+    return render(request, 'service_requests/service_type_list.html', {'service_types': service_types})
 
 
 @login_required
@@ -609,7 +609,7 @@ def service_type_create(request):
     else:
         form = ServiceTypeForm()
     
-    return render(request, 'requests/service_type_form.html', {'form': form, 'title': 'Create Service Type'})
+    return render(request, 'service_requests/service_type_form.html', {'form': form, 'title': 'Create Service Type'})
 
 
 @login_required
@@ -626,7 +626,7 @@ def service_type_edit(request, pk):
     else:
         form = ServiceTypeForm(instance=service_type)
     
-    return render(request, 'requests/service_type_form.html', {'form': form, 'title': 'Edit Service Type', 'service_type': service_type})
+    return render(request, 'service_requests/service_type_form.html', {'form': form, 'title': 'Edit Service Type', 'service_type': service_type})
 
 
 @login_required
@@ -727,4 +727,4 @@ def reassign_assignment(request, pk):
         form = ReassignForm()
         form.fields['assigned_to'].queryset = User.objects.filter(role='media_team').exclude(pk=assignment.assigned_to.pk)
     
-    return render(request, 'requests/reassign.html', {'form': form, 'assignment': assignment, 'service_request': service_request})
+    return render(request, 'service_requests/reassign.html', {'form': form, 'assignment': assignment, 'service_request': service_request})

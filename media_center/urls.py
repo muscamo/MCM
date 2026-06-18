@@ -5,10 +5,10 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('requests.urls')),
+    path('', include('service_requests.urls')),
     path('users/', include('users.urls')),
     path('notifications/', include('notifications.urls')),
-    # path('accounts/', include('allauth.urls')),  # Commented out until django-allauth is installed
+    path('accounts/', include('allauth.urls')),
 ]
 
 if settings.DEBUG:

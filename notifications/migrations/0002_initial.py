@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('notifications', '0001_initial'),
-        ('requests', '0001_initial'),
+        ('service_requests', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -24,6 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notification',
             name='request',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to='requests.servicerequest'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='notifications', to='service_requests.servicerequest'),
         ),
     ]

@@ -1,0 +1,16 @@
+{% extends "notifications/email_base.html" %}
+
+{% block content %}
+    <h3>{{ notification.title }}</h3>
+    <p>{{ notification.message }}</p>
+    
+    {% if notification.request %}
+        <p><strong>Service Request #{{ notification.request.id }}</strong></p>
+        <p>Title: {{ notification.request.title }}</p>
+        <p>Status: {{ notification.request.get_status_display }}</p>
+        
+        <a href="{{ site_url }}{% url 'request_detail' pk=notification.request.pk %}" class="button">View Request</a>
+    {% endif %}
+    
+    <p><small>Sent on: {{ notification.created_at|date:"F j, Y, g:i a" }}</small></p>
+{% endblock %}

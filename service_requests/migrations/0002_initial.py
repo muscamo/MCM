@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('requests', '0001_initial'),
+        ('service_requests', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='servicerequest',
             name='department',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='requests', to='requests.department'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='requests', to='service_requests.department'),
         ),
         migrations.AddField(
             model_name='servicerequest',
@@ -53,22 +53,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='requestcomment',
             name='request',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='comments', to='requests.servicerequest'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='comments', to='service_requests.servicerequest'),
         ),
         migrations.AddField(
             model_name='requestattachment',
             name='request',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attachments', to='requests.servicerequest'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attachments', to='service_requests.servicerequest'),
         ),
         migrations.AddField(
             model_name='assignment',
             name='request',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to='requests.servicerequest'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to='service_requests.servicerequest'),
         ),
         migrations.AddField(
             model_name='servicerequest',
             name='service_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='requests', to='requests.servicetype'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='requests', to='service_requests.servicetype'),
         ),
         migrations.AlterUniqueTogether(
             name='assignment',

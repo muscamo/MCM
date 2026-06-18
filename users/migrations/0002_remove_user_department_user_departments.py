@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('requests', '0002_initial'),
+        ('service_requests', '0002_initial'),
         ('users', '0001_initial'),
     ]
 
@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='departments',
-            field=models.ManyToManyField(blank=True, related_name='members', to='requests.department'),
+            field=models.ManyToManyField(
+                blank=True, related_name='members', to='service_requests.department'),
         ),
     ]

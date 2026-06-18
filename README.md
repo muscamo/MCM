@@ -92,6 +92,11 @@ A Django + HTMX application for managing media center service requests. This sys
    EMAIL_HOST_USER=your-email@gmail.com
    EMAIL_HOST_PASSWORD=your-app-password
    DEFAULT_FROM_EMAIL=noreply@mediacenter.com
+   
+   # Google OAuth2 Configuration (for Google Workspace login)
+   GOOGLE_OAUTH_CLIENT_ID=your-google-client-id
+   GOOGLE_OAUTH_SECRET=your-google-client-secret
+   GOOGLE_OAUTH_KEY=your-google-key
    ```
 
 6. **Run migrations**
@@ -113,7 +118,7 @@ A Django + HTMX application for managing media center service requests. This sys
    
    Then run:
    ```python
-   from requests.models import Department, ServiceType
+   from service_requests.models import Department, ServiceType
    
    # Create departments
    dept1 = Department.objects.create(name='Marketing', description='Marketing department')

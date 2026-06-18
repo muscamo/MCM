@@ -13,7 +13,7 @@ class User(AbstractUser):
 
     role = models.CharField(max_length=30, choices=ROLE_CHOICES, default='department_staff')
     departments = models.ManyToManyField(
-        'requests.Department',
+        'service_requests.Department',
         blank=True,
         related_name='members'
     )
@@ -23,10 +23,11 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    # Google OAuth fields (commented out until django-allauth is installed)
-    # google_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    # google_picture_url = models.URLField(blank=True, null=True)
-    # google_verified_email = models.BooleanField(default=False)
+    # Google OAuth fields
+    google_id = models.CharField(
+        max_length=255, blank=True, null=True, unique=True)
+    google_picture_url = models.URLField(blank=True, null=True)
+    google_verified_email = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.get_full_name()} ({self.get_role_display()})"

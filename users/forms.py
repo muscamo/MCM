@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
-from requests.models import Department
+from service_requests.models import Department
 
 
 class UserRegistrationForm(UserCreationForm):

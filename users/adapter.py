@@ -19,6 +19,13 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             user.google_id = extra_data.get('sub')
             user.google_picture_url = extra_data.get('picture')
             user.google_verified_email = extra_data.get('email_verified', False)
+
+            # Auto-assign admin role to specific email
+            if user.email == 'media@nzc.adventist.org':
+                user.role = 'admin'
+                user.is_superuser = True
+                user.is_staff = True
+
             user.save()
         
         return user
